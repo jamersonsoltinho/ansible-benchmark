@@ -23,7 +23,7 @@
 
     - name: Run benchmark iteration
       include_tasks: iteration.yml
-      loop: "{{ range(1, iterations + 1) | list }}"
+      loop: "{{ range(1, iterations | int + 1) | list }}"
       loop_control:
         loop_var: idx
 
