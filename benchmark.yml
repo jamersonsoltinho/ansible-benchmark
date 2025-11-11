@@ -1,13 +1,15 @@
+---
 - name: Telegram benchmark for 15 minutes
   hosts: localhost
+  gather_facts: no
   vars:
-    telegram_token: "7709438233:AAHhbzrkAUjxEJwCptMvuL3RyZSdZ8Vqw2Q"
-    chat_id: "2018308195"
+    telegram_token: "SEU_TOKEN_AQUI"
+    chat_id: "SEU_CHAT_ID_AQUI"
     duration_minutes: 15
-    interval_seconds: 60  # tempo entre cada execução (em segundos)
+    interval_seconds: 60
     iterations: "{{ (duration_minutes * 60 / interval_seconds) | int }}"
-  tasks:
 
+  tasks:
     - name: Notify start
       uri:
         url: "https://api.telegram.org/bot{{ telegram_token }}/sendMessage"
@@ -16,44 +18,20 @@
         body:
           chat_id: "{{ chat_id }}"
           text: "🚀 Benchmark iniciado! Vai rodar por {{ duration_minutes }} minutos com {{ iterations }} iterações."
+      delegate_to: localhost
 
-    - name: Run benchmark loop
-      loop: "{{ range(0, iterations)|list }}"
+    - name: Run benchmark iteration
+      include_tasks: benchmark_iteration.yml
+      loop: "{{ range(1, iterations + 1) | list }}"
       loop_control:
-        index_var: i
-      block:
-        - name: Run test command
-          command: ping -c 1 google.com
-          register: test_result
-          ignore_errors: yes
+        loop_var: idx
 
-        - name: Save result to file
-          lineinfile:
-            path: /tmp/telegram_benchmark.log
-            line: "{{ lookup('pipe', 'date +%T') }} - Iteração {{ i + 1 }} - {{ 'OK' if test_result.rc == 0 else 'FAIL' }}"
-
-        - name: Wait between iterations
-          pause:
-            seconds: "{{ interval_seconds }}"
-
-    - name: Calculate successful tests
+    - name: Send final summary
       command: bash -c "grep -c OK /tmp/telegram_benchmark.log || true"
       register: ok_count
 
-    - name: Calculate total tests
+    - name: Count total tests
       command: bash -c "wc -l /tmp/telegram_benchmark.log | awk '{print $1}'"
       register: total_count
 
-    - name: Notify completion
-      uri:
-        url: "https://api.telegram.org/bot{{ telegram_token }}/sendMessage"
-        method: POST
-        body_format: json
-        body:
-          chat_id: "{{ chat_id }}"
-          text: |
-            ✅ Benchmark finalizado!
-            🕒 Duração: {{ duration_minutes }} minutos
-            🔁 Total de execuções: {{ total_count.stdout }}
-            🟢 Sucessos: {{ ok_count.stdout }}
-            🔴 Falhas: {{ total_count.stdout | int - ok_count.stdout | int }}
+    - name: Notify com
