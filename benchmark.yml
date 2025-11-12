@@ -48,3 +48,17 @@
             🔁 Total de execuções: {{ total_count.stdout }}
             🟢 Sucessos: {{ ok_count.stdout }}
             🔴 Falhas: {{ total_count.stdout | int - ok_count.stdout | int }}
+            
+        # 🧨 --- ADICIONE A PARTIR DAQUI ---
+    - name: Notify forced error on Telegram
+      uri:
+        url: "https://api.telegram.org/bot{{ telegram_token }}/sendMessage"
+        method: POST
+        body_format: json
+        body:
+          chat_id: "{{ chat_id }}"
+          text: "⚠️ Um erro forçado será gerado agora para testar o comportamento pós-benchmark."
+
+    - name: Force an error after benchmark
+      fail:
+        msg: "💥 Erro forçado após os 15 minutos de benchmark!"
