@@ -1,5 +1,5 @@
 ---
-- name: Telegram benchmark for 15 minutes
+- name: Telegram benchmark for 25 minutes
   hosts: localhost
   connection: local
   gather_facts: no
@@ -7,7 +7,7 @@
   vars:
     telegram_token: "7709438233:AAHhbzrkAUjxEJwCptMvuL3RyZSdZ8Vqw2Q"
     chat_id: "2018308195"
-    duration_minutes: 15
+    duration_minutes: 25   # <-- alterado de 15 para 25
     interval_seconds: 60
     iterations: "{{ (duration_minutes * 60 / interval_seconds) | int }}"
 
@@ -48,8 +48,7 @@
             🔁 Total de execuções: {{ total_count.stdout }}
             🟢 Sucessos: {{ ok_count.stdout }}
             🔴 Falhas: {{ total_count.stdout | int - ok_count.stdout | int }}
-            
-        # 🧨 --- ADICIONE A PARTIR DAQUI ---
+
     - name: Notify forced error on Telegram
       uri:
         url: "https://api.telegram.org/bot{{ telegram_token }}/sendMessage"
@@ -61,4 +60,4 @@
 
     - name: Force an error after benchmark
       fail:
-        msg: "💥 Erro forçado após os 15 minutos de benchmark!"
+        msg: "💥 Erro forçado após os {{ duration_minutes }} minutos de benchmark!"
