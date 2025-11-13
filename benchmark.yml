@@ -7,7 +7,7 @@
   vars:
     telegram_token: "7709438233:AAHhbzrkAUjxEJwCptMvuL3RyZSdZ8Vqw2Q"
     chat_id: "2018308195"
-    duration_minutes: 25   # <-- alterado de 15 para 25
+    duration_minutes: 25
     interval_seconds: 60
     iterations: "{{ (duration_minutes * 60 / interval_seconds) | int }}"
 
